@@ -19,10 +19,11 @@
 #let iu = math.upright("i")
 #let ddot(it) = math.dot.double(it)
 #let vb(it) = math.bold(math.upright(it))
+#let dcases(..args) = math.cases(..args.pos().map(math.display), ..args.named())
 
 #let num_eq(it) = math.equation(
   block: true,
-  numbering: "(1)",
+  numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first()),
   it,
 )
 
@@ -138,7 +139,7 @@
   )
 
   // Remove first-line-indent in lists
-  show list: set par(first-line-indent: (amount: 0pt, all: false))
+  // show list: set par(first-line-indent: (amount: 0pt, all: false))
 
   // Add vertical space after headings.
   show heading: it => {
@@ -194,8 +195,11 @@
     }
   })
 
-  // Breakable equation.
+  // Breakable & always 100% width (in list) equation.
   show math.equation: set block(breakable: true)
+  show math.equation.where(block: true): eq => {
+    block(width: 100%, inset: 0pt, align(center, eq))
+  }
 
   // Display inline code in a small box that retains the correct baseline.
   show raw.where(block: false): box.with(
@@ -231,6 +235,43 @@
       }
       it
     }
+
+    let typst_builtin_sequence = ([A] + [ ] + [B]).func()
+    let typst_builtin_space = [ ].func()
+
+    // Automatically stick paragraph to block equation (Testing)
+    let stick_paragraph(it) = {
+      if type(it) == content and it.func() == typst_builtin_sequence {
+        let para = none
+
+        for child in it.children {
+          if child.func() in (text, typst_builtin_space, ref, footnote, h, math.equation) {
+            if child.func() == math.equation and child.block {
+              if para != none {
+                if para == [ ] {
+                  para
+                } else {
+                  block(sticky: true, parbreak() + para)
+                }
+                para = none
+              }
+              child
+            } else {
+              para += child
+            }
+          } else {
+            para
+            stick_paragraph(child)
+            para = none
+          }
+        }
+        para
+      } else {
+        it
+      }
+    }
+    show: stick_paragraph
+
     body
   }
 

@@ -1,41 +1,8 @@
 #import "/template/template.typ": *
 
-#let typst_builtin_sequence = ([A] + [ ] + [B]).func()
-#let typst_builtin_space = [ ].func()
-
-#let test_test(it) = {
-  if type(it) == content and it.func() == typst_builtin_sequence {
-    let para = none
-
-    for child in it.children {
-      if child.func() in (text, typst_builtin_space, ref, footnote, h, math.equation) {
-        if child.func() == math.equation and child.block {
-          if para != none {
-            if para == [ ] {
-              para
-            } else {
-              block(sticky: true, parbreak() + para)
-            }
-            para = none
-          }
-          child
-        } else {
-          para += child
-        }
-      } else {
-        para
-        child
-        para = none
-      }
-    }
-    para
-  } else {
-    it
-  }
-}
-#show: test_test
-
 = 部分算法分析
+
+
 
 == 舵轮底盘控制器
 
@@ -58,7 +25,7 @@
 
 以舵轮底盘的中心为原点，从原点出发，逆时针依次选择两相邻轮，构成的射线为 $x comma y$ 轴，建立自然坐标系。
 
-逆时针依次遍历位于 $x$ 正， $y$ 正， $x$ 负， $y$ 负处的轮，分别记其编号 $i$ 为 $1 comma 2 comma 3 comma 4$
+逆时针依次遍历位于 $x$ 正，$y$ 正，$x$ 负，$y$ 负处的轮，分别记其编号 $i$ 为 $1 comma 2 comma 3 comma 4$
 。
 
 对于任意轮 $i$，将右手拇指指向轮电机输出轴方向，定义右手四指方向为轮转速 $omega_i$ 的正方向。
@@ -121,7 +88,7 @@ $
 
 ==== 轮电机 <head:底盘控制器.计算电机控制力矩.轮电机>
 
-在每个控制帧内，设底盘以观测速度为初速度，做加速度为目标控制加速度的匀加速运动，则在每个控制帧内， $lr((dot(x)_0 comma dot(y)_0 comma dot(theta)_0)) = upright("const")$， $lr((ddot(x) comma ddot(y) comma ddot(theta))) = upright("const")$，有：
+在每个控制帧内，设底盘以观测速度为初速度，做加速度为目标控制加速度的匀加速运动，则在每个控制帧内，$lr((dot(x)_0 comma dot(y)_0 comma dot(theta)_0)) = upright("const")$，$lr((ddot(x) comma ddot(y) comma ddot(theta))) = upright("const")$，有：
 $
   vec(dot(x), dot(y), dot(theta)) = vec(dot(x)_0 + ddot(x) t, dot(y)_0 + ddot(y) t, dot(theta)_0 + ddot(theta) t)
 $
@@ -217,7 +184,7 @@ $
 
 ==== 舵电机
 
-设舵轮 $i$ 的正方向相对底盘的夹角（舵向角）的目标控制值为 $zeta_i$，则#footnote[ $zeta_i (t)$ 和 $dot(zeta)_i (t)$ 完整表达式见附录。]：
+设舵轮 $i$ 的正方向相对底盘的夹角（舵向角）的目标控制值为 $zeta_i$，则#footnote[ $zeta_i (t)$ 和 $dot(zeta)_i (t)$ 完整表达式见附录（TODO）。]：
 $ zeta_i (t) = arg lr((dot(vb(r))_i)) - theta $
 $ dot(zeta)_i (t) = (diff zeta_i) / (diff t) $
 
@@ -303,7 +270,7 @@ $
   ddot(x)_(upright("max")) = ddot(r)_(upright("max")) cos lr((alpha)) comma thin thin ddot(y)_(upright("max")) = ddot(r)_(upright("max")) sin lr((alpha))
 $
 
-在一次解算内， $alpha$ 不变，认为其是已知量。
+在一次解算内，$alpha$ 不变，认为其是已知量。
 
 ==== 控制加速度约束
 
@@ -349,10 +316,10 @@ $upright("NLP")$ 问题是难以求解的，考虑利用表达式的良好性质
 
 菱形的右顶点 $A lr((mu g comma 0))$，上顶点 $B lr((0 comma frac(m R, J) mu g))$，写为线性不等式形式：
 $
-  cases(
-    frac(1, mu g) lr((x + frac(J y, m R))) lt.eq 1\
-    frac(1, mu g) lr((x - frac(J y, m R))) lt.eq 1\
-    frac(1, mu g) lr((- x + frac(J y, m R))) lt.eq 1\
+  dcases(
+    frac(1, mu g) lr((x + frac(J y, m R))) lt.eq 1 \
+    frac(1, mu g) lr((x - frac(J y, m R))) lt.eq 1 \
+    frac(1, mu g) lr((- x + frac(J y, m R))) lt.eq 1 \
     frac(1, mu g) lr((- x - frac(J y, m R))) lt.eq 1
   )
 $
@@ -367,7 +334,7 @@ $
 ) <eq:单个电机预期消耗功率的经验公式>
 
 
-其中， $k_1$（电流热损耗系数）与 $k_2$（机械损耗系数）为常数，由实验拟合得出。
+其中，$k_1$（电流热损耗系数）与 $k_2$（机械损耗系数）为常数，由实验拟合得出。
 
 @head:底盘控制器.计算电机控制力矩.轮电机 计算了轮电机的控制力矩：
 $ tau_i = limits(tau_i)_"feedforward" + limits(tau_i)_"PID" $
@@ -408,7 +375,7 @@ $
 $display(frac(d^2 m^2 J^2, 64 R^2) > 0)$ ，两边同乘该因子，整理得：
 $ B^2 lt.eq 4 A C $
 
-可知该二次约束对应的 $Q$ 矩阵是半正定的， $P_"total"$ 是一个凸函数，相应的二次约束为凸二次约束。
+可知该二次约束对应的 $Q$ 矩阵是半正定的，$P_"total"$ 是一个凸函数，相应的二次约束为凸二次约束。
 
 === 求解问题
 
@@ -504,11 +471,9 @@ Elapsed time: 0.00296087s
 
 ===== 求线性可行域按逆时针排序的角点序列
 
-设 $display(
-  cases(
-    x & = ddot(r)\
-    y & = ddot(theta)
-  )
+设 $dcases(
+  x & = ddot(r)\
+  y & = ddot(theta)
 )$，将问题转换到二维笛卡尔坐标系下。
 
 打滑约束的可行域是沿 $x, y$
@@ -556,13 +521,15 @@ done
 将凸二次约束写为矩阵形式：
 $ 1 / 2 vb(x)^T Q vb(x) + vb(p)^T vb(x) + r = 0 $
 
-其中：
-$
-  vb(x) & = mat(delim: "[", ddot(r); ddot(theta)) comma \
-      Q & = mat(delim: "[", 2 A, B; B, 2 C) comma       \
-  vb(p) & = mat(delim: "[", D; E) comma                 \
-      r & = F - P_(upright("max")) dot.basic
-$
+其中 #footnote[若 $A < 0$，按@eq:矩阵形式凸二次约束的各数值量 赋值会导致 $Q$ 为负定矩阵，此时需对 $A,B,C,D,E,F$ 取相反数处理。]：
+#num_eq[
+  $
+    vb(x) & = mat(delim: "[", ddot(r); ddot(theta)) comma \
+        Q & = mat(delim: "[", 2 A, B; B, 2 C) comma       \
+    vb(p) & = mat(delim: "[", D; E) comma                 \
+        r & = F - P_(upright("max")) dot.basic
+  $
+]<eq:矩阵形式凸二次约束的各数值量>
 
 需要极大化的目标函数：$ z lr((vb(x))) = vb(a) dot.op vb(x) $
 
@@ -581,12 +548,12 @@ $
 求解线性方程（假设 $Q^(- 1)$ 存在）：
 #num_eq($ vb(x) = Q^(- 1) lr((1 / lambda vb(a) - vb(p))) $) <eq:令梯度为0求解线性方程>
 
-代入约束条件并化简，得到：
+代入约束条件并化简，得到 #footnote[实际上 $lambda$ 存在正负两解，对应使目标函数最大和最小时的取值。但由于 $Q$ 为半正定矩阵，正解使目标函数取得最大值，故取正解。]：
 $ lambda = sqrt(frac(vb(a)^T Q^(- 1) vb(a), vb(p)^T Q^(- 1) vb(p) - 2 r)) $
 
 计算 $lambda$ 并代入@eq:令梯度为0求解线性方程，得到凸二次约束的最优解。若最优解在角点序列多边形内，则直接返回最优解。
 
-在求解过程中我们假定 $Q^(- 1)$ 存在，但@head:底盘控制器.增加约束.功率约束 仅能证明 $Q$ 是半正定矩阵。当 $Q$ 不正定时，约束曲线将由椭圆退化为抛物线或分段线性结构（如两条线段），导致优化问题欠定， $Q^(- 1)$ 不存在。此时在退化方向（如抛物线开口方向）上，最优解可能趋向无穷大。
+在求解过程中我们假定 $Q^(- 1)$ 存在，但@head:底盘控制器.增加约束.功率约束 仅能证明 $Q$ 是半正定矩阵。当 $Q$ 不正定时，约束曲线将由椭圆退化为抛物线或分段线性结构（如两条线段），导致优化问题欠定，$Q^(- 1)$ 不存在。此时在退化方向（如抛物线开口方向）上，最优解可能趋向无穷大。
 
 考虑引入 Moore-Penrose 伪逆 $Q^+$ 替代 $Q^(- 1)$。然而当 $Q$
 奇异时，伪逆会强制给出最小范数解：一方面，该解滤除了描述系统退化特性的零空间分量；另一方面，在有解方向上产生与实际物理意义不符的数值结果。
@@ -646,7 +613,7 @@ $ vb(x)_"reg" approx 1 / epsilon vb(v)_"null" + O(1) $
 
 ===== 求解效果
 
-代码编写完成后#footnote[相关代码见附录。]，使用同样的输入，与杉树求解器的效果进行对比：
+代码编写完成后，使用同样的输入，与杉树求解器的效果进行对比：
 
 ```
 COPT solution: (-0.006806, 2.035123)
