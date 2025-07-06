@@ -1,4 +1,4 @@
-// #import "@preview/cuti:0.3.0": show-cn-fakebold
+#import "@preview/cuti:0.3.0": show-cn-fakebold
 // #import "@preview/cjk-unbreak:0.1.1": remove-cjk-break-space
 
 // Workaround for the lack of an `std` scope.
@@ -93,7 +93,7 @@
   // show: remove-cjk-break-space
 
   set text(lang: "zh")
-  set text(font: ("libertinus serif", "Times New Roman", "Source Han Serif SC", "SimSun"))
+  set text(font: ("libertinus serif", "Times New Roman", "FZShuSong-Z01S", "Source Han Serif SC"))
 
   // Set the body font.
   set text(size: 11pt) // default is 11pt
@@ -108,7 +108,12 @@
   // Cover page.
   page(align(left + horizon, block(width: 90%)[
     #let v-space = v(2em, weak: true)
-    #text(3em)[*#title*]
+    #text(
+      font: ("libertinus serif", "Times New Roman", "Source Han Serif SC"),
+      size: 3em,
+    )[
+      *#title*
+    ]
 
     #v-space
     #text(1.6em, author)
@@ -127,12 +132,15 @@
     }
   ]))
 
+  // Apply fake bold
+  show: show-cn-fakebold
+
   // Configure paragraph properties.
   // Default leading is 0.65em.
   // Default spacing is 1.2em.
   set par(
     leading: 0.8em,
-    spacing: 1.1em,
+    spacing: 1.0em,
     first-line-indent: (amount: 2em, all: true),
     justify: true,
     linebreaks: "optimized",
