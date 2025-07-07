@@ -1,4 +1,4 @@
-#import "/template/template.typ": *
+#import "/template/template.typ": ilm
 
 #show: ilm.with(
   title: [RMCS \ 思想、架构和指南],
@@ -18,4 +18,20 @@
   listing-index: (enabled: true),
 )
 
-#include "documents/chap_algorithm/steering_wheel.typ"
+= 无下位机，RMCS与libRMCS
+#include "chapters/introduction/introduction.typ"
+
+= 环境配置
+#include "chapters/environment/environment.typ"
+
+= 使用libRMCS
+#include "chapters/librmcs/librmcs.typ"
+
+= RMCS架构分析
+#include "chapters/rmcs/rmcs.typ"
+
+= RMCS部分算法分析
+#include "chapters/algorithm/steering_wheel.typ"
+
+= 通讯架构分析
+#include "chapters/communication/communication.typ"

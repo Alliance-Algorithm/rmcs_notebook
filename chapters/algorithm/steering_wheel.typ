@@ -1,9 +1,5 @@
 #import "/template/template.typ": *
 
-= 部分算法分析
-
-
-
 == 舵轮底盘控制器
 
 约定复数 $a + b iu$（$iu$ 为虚数单位）表示向量 $lr((a comma b))$。
@@ -381,7 +377,7 @@ $ B^2 lt.eq 4 A C $
 
 问题的数学形式为：
 $
-    "maximize" quad & f lr((tau_t comma tau_r)) = a tau_t + b tau_r           \
+    "maximize" quad & f lr((ddot(r), ddot(theta))) = a tau_t + b tau_r        \
   "subject to" quad & ddot(r) lt.eq ddot(r)_"max"                             \
                     & ddot(theta) lt.eq ddot(theta)_"max"                     \
                     & frac(1, mu g) lr((x + frac(J y, m R))) lt.eq 1          \

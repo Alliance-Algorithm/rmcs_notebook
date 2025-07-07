@@ -100,7 +100,7 @@
 
   // Set raw text font.
   // Default is Fira Mono at 8.8pt
-  show raw: set text(font: "Consolas", size: 10pt)
+  show raw: set text(font: "Consolas")
 
   // Configure page size and margins.
   set page(paper: paper-size, margin: (bottom: 1.75cm, top: 2.25cm))
@@ -208,17 +208,6 @@
   show math.equation.where(block: true): eq => {
     block(width: 100%, inset: 0pt, align(center, eq))
   }
-
-  // Display inline code in a small box that retains the correct baseline.
-  show raw.where(block: false): box.with(
-    fill: fill-color.darken(2%),
-    inset: (x: 3pt, y: 0pt),
-    outset: (y: 3pt),
-    radius: 2pt,
-  )
-
-  // Display block code with padding.
-  show raw.where(block: true): block.with(inset: (x: 5pt))
 
   // Break large tables across pages.
   show figure.where(kind: table): set block(breakable: true)
