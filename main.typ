@@ -31,6 +31,7 @@
 #include "chapters/rmcs/rmcs.typ"
 
 = RMCS部分算法分析
+#include "chapters/algorithm/omni_wheel.typ"
 #include "chapters/algorithm/steering_wheel.typ"
 
 = 通讯架构分析

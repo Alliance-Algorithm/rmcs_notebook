@@ -2,10 +2,7 @@
 
 == 舵轮底盘控制器
 
-约定复数 $a + b iu$（$iu$ 为虚数单位）表示向量 $lr((a comma b))$。
-
-底盘控制器接收底盘的目标水平控制速度 $dot(vb(r)) = dot(x) + iu dot(y)$ 和目标旋转控制速度 $dot(theta)$，
-并输出轮电机和舵电机的目标控制力矩。
+舵轮底盘控制器接收底盘的目标水平控制速度 $dot(vb(r)) = dot(x) + iu dot(y)$ 和目标旋转控制速度 $dot(theta)$，并输出轮电机和舵电机的目标控制力矩。
 
 底盘的控制频率为 $1 thin "kHz"$，意味着每帧计算时间 $lt.eq 1 thin "ms"$。
 因此底盘控制器需要尽可能降低运算时间，提高实时性。
@@ -26,7 +23,15 @@
 
 对于任意轮 $i$，将右手拇指指向轮电机输出轴方向，定义右手四指方向为轮转速 $omega_i$ 的正方向。
 令轮以速度 $omega_i > 0$ 旋转，定义轮中心正上方的的线速度方向为舵的正方向。
-设轮的正方向与 $x$ 轴的夹角为 $alpha_i$，轮中心与底盘中心连线与 $x$ 轴夹角为：$ phi_i = cases(delim: "{", 0 comma & i = 1 comma, pi slash 2 comma & i = 2 comma, pi comma & i = 3 comma, 3 pi slash 2 comma & i = 4 dot.basic) $
+设轮的正方向与 $x$ 轴的夹角为 $alpha_i$，轮中心与底盘中心连线与 $x$ 轴夹角为：
+$
+  phi_i = cases(
+               0 comma quad & i = 1 comma \
+      pi slash 2 comma quad & i = 2 comma \
+              pi comma quad & i = 3 comma \
+    3 pi slash 2 comma quad & i = 4 .
+  )
+$
 
 若观测其输出轴转速为 $omega_i$。若不考虑打滑，底盘在此处相对地面的速度大小为 $u_i = omega_i r$，速度向量为 $vb(u)_i = omega_i r e^(iu alpha_i)$。
 
@@ -34,7 +39,8 @@
 
 以 $t = 0$ 时刻的自然坐标系为基准，建立世界坐标系。
 
-在世界坐标系下，底盘有三个自由度 $x comma y comma theta$。显然 $t = 0$ 时刻 $lr((x comma y comma theta)) = (x_0 comma y_0 comma theta_0) = 0$。
+在世界坐标系下，底盘有三个自由度 $x comma y comma theta$。
+显然 $t = 0$ 时刻 $(x comma y comma theta) = (x_0 comma y_0 comma theta_0) = 0$。
 
 对于轮 $i$，在任意 $t$ 时刻，其中心位置向量为：
 $vb(r)_i (t) = x + iu y + R e^(iu lr((theta + phi_i)))$。
@@ -61,7 +67,7 @@ $
   mat(dot(x)_0, dot(y)_0 + R dot(theta)_0; dot(x)_0 - R dot(theta)_0, dot(y)_0; dot(x)_0, dot(y)_0 - R dot(theta)_0; dot(x)_0 + R dot(theta)_0, dot(y)_0) = r mat(omega_1 cos lr((alpha_1)), omega_1 sin lr((alpha_1)); omega_2 cos lr((alpha_2)), omega_2 sin lr((alpha_2)); omega_3 cos lr((alpha_3)), omega_3 sin lr((alpha_3)); omega_4 cos lr((alpha_4)), omega_4 sin lr((alpha_4)))
 $
 
-共 $8$ 个方程，和 $3$ 个未知数，显然这是一个超定方程组，可以通过构造特征方程求最小二乘解得到近似解：
+共 $8$ 个方程，和 $3$ 个未知数，显然这也是一个超定方程组，可以通过构造特征方程，求最小二乘近似解：
 $
   dot(x)_0 & = r / 4 lr((omega_1 cos alpha_1 + omega_2 cos alpha_2 + omega_3 cos alpha_3 + omega_4 cos alpha_4)) comma\
   dot(y)_0 & = r / 4 lr((omega_1 sin alpha_1 + omega_2 sin alpha_2 + omega_3 sin alpha_3 + omega_4 sin alpha_4)) comma\
@@ -70,9 +76,9 @@ $
 
 得到底盘的观测速度。
 
-=== 闭环底盘速度 <head:底盘控制器.闭环底盘速度>
+=== 闭环底盘速度 <head:舵轮底盘控制器.闭环底盘速度>
 
-通过PID（比例-积分-微分）控制器，基于底盘的目标控制速度 $lr((dot(x) comma dot(y) comma dot(theta)))$ 与观测速度 $(dot(x)_0 comma dot(y)_0 comma dot(theta)_0)$，闭环底盘的目标控制加速度 $lr((ddot(x) comma ddot(y) comma ddot(theta)))$。
+通过PID控制器，基于底盘的目标控制速度 $lr((dot(x) comma dot(y) comma dot(theta)))$ 与观测速度 $(dot(x)_0 comma dot(y)_0 comma dot(theta)_0)$，闭环底盘的目标控制加速度 $lr((ddot(x) comma ddot(y) comma ddot(theta)))$。
 
 $
       ddot(x) & = "PID"_"velocity" lr((dot(x) - dot(x)_0)) comma             \
@@ -82,7 +88,7 @@ $
 
 === 计算电机控制力矩
 
-==== 轮电机 <head:底盘控制器.计算电机控制力矩.轮电机>
+==== 轮电机 <head:舵轮底盘控制器.计算电机控制力矩.轮电机>
 
 在每个控制帧内，设底盘以观测速度为初速度，做加速度为目标控制加速度的匀加速运动，则在每个控制帧内，$lr((dot(x)_0 comma dot(y)_0 comma dot(theta)_0)) = upright("const")$，$lr((ddot(x) comma ddot(y) comma ddot(theta))) = upright("const")$，有：
 $
@@ -132,7 +138,7 @@ $
   )
 $
 
-共3个实数方程，但存在8个未知量。显然该系统是超静定的，若不增加条件无法求解。
+共3个实数方程，但存在8个未知量。显然这也是一个欠定方程，若不增加条件无法求解。
 考虑引入最小范数条件，即最小化反力总平方和：
 $ min sum_(i = 1)^4 lr((F_(x i)^2 + F_(y i)^2)) $
 
@@ -253,32 +259,32 @@ $
 
 === 增加约束
 
-在@head:底盘控制器.闭环底盘速度 中，由PID控制器计算了底盘的目标控制加速度，但显然底盘功率并非无限，底盘在加速度过大时也会存在打滑。因此实际控制加速度不可能总与期望相符，考虑引入约束条件以保证加速度合法，通过极大化目标函数 $z lr((ddot(r) comma ddot(theta))) = a ddot(r) + b ddot(theta)$ 以确保获得最优解。
+在@head:舵轮底盘控制器.闭环底盘速度 中，由PID控制器计算了底盘的目标控制加速度，但显然底盘功率并非无限，底盘在加速度过大时也会存在打滑。因此实际控制加速度不可能总与期望相符，考虑引入约束条件以保证加速度合法，通过极大化目标函数 $z lr((ddot(r) comma ddot(theta))) = a ddot(r) + b ddot(theta)$ 以确保获得最优解。
 
-@head:底盘控制器.闭环底盘速度 计算的未约束的目标控制加速度，在本小节中用 $lr((ddot(x)_(upright("max")) comma ddot(y)_(upright("max")) comma ddot(theta)_(upright("max"))))$ 表示。
+@head:舵轮底盘控制器.闭环底盘速度 计算的未约束的目标控制加速度，在本小节中用 $lr((ddot(x)_"max" comma ddot(y)_"max" comma ddot(theta)_"max"))$ 表示。
 
-设 $alpha = tan^(- 1) lr((ddot(x)_(upright("max")) comma ddot(y)_(upright("max"))))$ 是底盘目标平移控制加速度的方向角，有：
+设 $alpha = tan^(- 1) lr((ddot(x)_"max" comma ddot(y)_"max"))$ 是底盘目标平移控制加速度的方向角，有：
 $ ddot(x) = ddot(r) cos lr((alpha)) comma thin thin ddot(y) = ddot(r) sin lr((alpha)) $
 <numbering>
 
-设 $ddot(r)_(upright("max")) = sqrt(ddot(x)_(upright("max"))^2 + ddot(y)_(upright("max"))^2)$，有：
+设 $ddot(r)_"max" = sqrt(ddot(x)_"max"^2 + ddot(y)_"max"^2)$，有：
 $
-  ddot(x)_(upright("max")) = ddot(r)_(upright("max")) cos lr((alpha)) comma thin thin ddot(y)_(upright("max")) = ddot(r)_(upright("max")) sin lr((alpha))
+  ddot(x)_"max" = ddot(r)_"max" cos lr((alpha)) comma thin thin ddot(y)_"max" = ddot(r)_"max" sin lr((alpha))
 $
 
 在一次解算内，$alpha$ 不变，认为其是已知量。
 
 ==== 控制加速度约束
 
-对于约束后的平移控制加速度 $ddot(r)$，它应当小于等于未约束的平移控制加速度 $ddot(r)_(upright("max"))$。
+对于约束后的平移控制加速度 $ddot(r)$，它应当小于等于未约束的平移控制加速度 $ddot(r)_"max"$。
 
-对于约束后的旋转控制加速度 $ddot(theta)$，它应当小于等于未约束的旋转控制加速度 $ddot(theta)_(upright("max"))$ #footnote[ $ddot(theta)_(upright("max"))$ 可能为负，本文只考虑其非负的情况。在实际的算法实现中，若遇到负值，将相关值取相反数处理，完成求解后，将结果反向映射回控制量。]。
+对于约束后的旋转控制加速度 $ddot(theta)$，它应当小于等于未约束的旋转控制加速度 $ddot(theta)_"max"$ #footnote[ $ddot(theta)_"max"$ 可能为负，本文只考虑其非负的情况。在实际的算法实现中，若遇到负值，将相关值取相反数处理，完成求解后，将结果反向映射回控制量。]。
 
 于是：
 $
   cases(
-    ddot(r) lt.eq ddot(r)_(upright("max")) \
-    ddot(theta) lt.eq ddot(theta)_(upright("max"))
+    ddot(r) lt.eq ddot(r)_"max" \
+    ddot(theta) lt.eq ddot(theta)_"max"
   )
 $
 
@@ -320,7 +326,7 @@ $
   )
 $
 
-==== 功率约束 <head:底盘控制器.增加约束.功率约束>
+==== 功率约束 <head:舵轮底盘控制器.增加约束.功率约束>
 
 显然底盘功率存在上限，需要加以限制。
 
@@ -332,7 +338,7 @@ $
 
 其中，$k_1$（电流热损耗系数）与 $k_2$（机械损耗系数）为常数，由实验拟合得出。
 
-@head:底盘控制器.计算电机控制力矩.轮电机 计算了轮电机的控制力矩：
+@head:舵轮底盘控制器.计算电机控制力矩.轮电机 计算了轮电机的控制力矩：
 $ tau_i = limits(tau_i)_"feedforward" + limits(tau_i)_"PID" $
 
 其中：
@@ -349,7 +355,7 @@ $
 
 代入@eq:单个电机预期消耗功率的经验公式，得到：
 $
-  P_"total" = sum_(i = 1)^4 P_i lr((tau_i)) = A ddot(r)^2 + B ddot(r) ddot(theta) + C ddot(theta)^2 + D ddot(r) + E ddot(theta) + F lt.eq P_(upright("max"))
+  P_"total" = sum_(i = 1)^4 P_i lr((tau_i)) = A ddot(r)^2 + B ddot(r) ddot(theta) + C ddot(theta)^2 + D ddot(r) + E ddot(theta) + F lt.eq P_"max"
 $
 
 其中：
@@ -373,11 +379,11 @@ $ B^2 lt.eq 4 A C $
 
 可知该二次约束对应的 $Q$ 矩阵是半正定的，$P_"total"$ 是一个凸函数，相应的二次约束为凸二次约束。
 
-=== 求解问题
+=== 问题求解
 
 问题的数学形式为：
 $
-    "maximize" quad & f lr((ddot(r), ddot(theta))) = a tau_t + b tau_r        \
+    "maximize" quad & z lr((ddot(r), ddot(theta))) = a tau_t + b tau_r        \
   "subject to" quad & ddot(r) lt.eq ddot(r)_"max"                             \
                     & ddot(theta) lt.eq ddot(theta)_"max"                     \
                     & frac(1, mu g) lr((x + frac(J y, m R))) lt.eq 1          \
@@ -458,7 +464,7 @@ Elapsed time: 0.00296087s
 查看日志可知，求解器在 $9$ 次迭代后得出了最优解 $("Optimal")$，经验证该解是正确的。
 但求解器单次计算耗时约 $3 thin "ms"$，大于许用的计算时间 $1 thin "ms"$，控制的实时性无法得到有效保证。
 
-==== 编写求解器求解析解
+==== 编写求解器求解析解<head:舵轮底盘控制器.问题求解.编写求解器求解析解>
 
 由于问题是一个仅有一个凸二次约束的凸二次约束规划 $("QCP")$ 问题，且维数仅为 $2$ 维，考虑配合图解法，手动编写求解器求问题的解析解。
 
@@ -515,7 +521,7 @@ done
 由于二次约束是凸的，最优解一定在可行域边缘，可以把不等式转换为等式，使用拉格朗日乘数法求解最优解。
 
 将凸二次约束写为矩阵形式：
-$ 1 / 2 vb(x)^T Q vb(x) + vb(p)^T vb(x) + r = 0 $
+$ 1 / 2 vb(x)^top Q vb(x) + vb(p)^top vb(x) + r = 0 $
 
 其中 #footnote[若 $A < 0$，按@eq:矩阵形式凸二次约束的各数值量 赋值会导致 $Q$ 为负定矩阵，此时需对 $A,B,C,D,E,F$ 取相反数处理。]：
 #num_eq[
@@ -523,7 +529,7 @@ $ 1 / 2 vb(x)^T Q vb(x) + vb(p)^T vb(x) + r = 0 $
     vb(x) & = mat(delim: "[", ddot(r); ddot(theta)) comma \
         Q & = mat(delim: "[", 2 A, B; B, 2 C) comma       \
     vb(p) & = mat(delim: "[", D; E) comma                 \
-        r & = F - P_(upright("max")) dot.basic
+        r & = F - P_"max" dot.basic
   $
 ]<eq:矩阵形式凸二次约束的各数值量>
 
@@ -549,7 +555,7 @@ $ lambda = sqrt(frac(vb(a)^T Q^(- 1) vb(a), vb(p)^T Q^(- 1) vb(p) - 2 r)) $
 
 计算 $lambda$ 并代入@eq:令梯度为0求解线性方程，得到凸二次约束的最优解。若最优解在角点序列多边形内，则直接返回最优解。
 
-在求解过程中我们假定 $Q^(- 1)$ 存在，但@head:底盘控制器.增加约束.功率约束 仅能证明 $Q$ 是半正定矩阵。当 $Q$ 不正定时，约束曲线将由椭圆退化为抛物线或分段线性结构（如两条线段），导致优化问题欠定，$Q^(- 1)$ 不存在。此时在退化方向（如抛物线开口方向）上，最优解可能趋向无穷大。
+在求解过程中我们假定 $Q^(- 1)$ 存在，但@head:舵轮底盘控制器.增加约束.功率约束 仅能证明 $Q$ 是半正定矩阵。当 $Q$ 不正定时，约束曲线将由椭圆退化为抛物线或分段线性结构（如两条线段），导致优化问题欠定，$Q^(- 1)$ 不存在。此时在退化方向（如抛物线开口方向）上，最优解可能趋向无穷大。
 
 考虑引入 Moore-Penrose 伪逆 $Q^+$ 替代 $Q^(- 1)$。然而当 $Q$
 奇异时，伪逆会强制给出最小范数解：一方面，该解滤除了描述系统退化特性的零空间分量；另一方面，在有解方向上产生与实际物理意义不符的数值结果。

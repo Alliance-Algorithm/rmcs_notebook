@@ -1,6 +1,3 @@
-#import "@preview/cuti:0.3.0": show-cn-fakebold
-// #import "@preview/cjk-unbreak:0.1.1": remove-cjk-break-space
-
 // Workaround for the lack of an `std` scope.
 #let std-bibliography = bibliography
 #let std-smallcaps = smallcaps
@@ -95,6 +92,15 @@
   set text(lang: "zh")
   set text(font: ("libertinus serif", "Times New Roman", "FZShuSong-Z01S", "Source Han Serif SC"))
 
+  // Set the font used for CJK punctuation marks
+  show regex("[。？！，、；：“”‘’『』「」（）〔〕【】─…—～·《》〈〉__]+"): set text(font: "Source Han Serif SC")
+
+  show text.where(weight: "bold").or(strong): set text(font: (
+    "libertinus serif",
+    "Times New Roman",
+    "Source Han Serif SC",
+  ))
+
   // Set the body font.
   set text(size: 11pt) // default is 11pt
 
@@ -108,10 +114,7 @@
   // Cover page.
   page(align(left + horizon, block(width: 90%)[
     #let v-space = v(2em, weak: true)
-    #text(
-      font: ("libertinus serif", "Times New Roman", "Source Han Serif SC"),
-      size: 3em,
-    )[
+    #text(size: 3em)[
       *#title*
     ]
 
@@ -131,9 +134,6 @@
       text(date.display(date-format))
     }
   ]))
-
-  // Apply fake bold
-  show: show-cn-fakebold
 
   // Configure paragraph properties.
   // Default leading is 0.65em.
@@ -209,6 +209,9 @@
     block(width: 100%, inset: 0pt, align(center, eq))
   }
 
+  // More gap in cases
+  set math.cases(gap: 0% + 0.6em)
+
   // Break large tables across pages.
   show figure.where(kind: table): set block(breakable: true)
   set table(
@@ -242,7 +245,7 @@
         let para = none
 
         for child in it.children {
-          if child.func() in (text, typst_builtin_space, ref, footnote, h, math.equation) {
+          if child.func() in (text, typst_builtin_space, ref, footnote, h, math.equation, strong) {
             if child.func() == math.equation and child.block {
               if para != none {
                 if para == [ ] {
